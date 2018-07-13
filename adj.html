@@ -1,0 +1,741 @@
+
+<style type="text/css">
+    html { 
+    	font-size: 4em; 
+    	width: 100vw;
+    }
+
+    body { 
+    	background-color: #f9f9f9;
+    	}
+
+    footer { 
+    	display: grid;
+    	margin: 0 auto;
+    	grid-gap: 0.5em;
+    	width: 6em;
+    }
+
+    button, select {
+    	background-color: rgba(0,0,0,0);
+		border: none;
+		border-radius: 6em;
+		color: rgba(0, 0, 0, 0.7);
+		cursor: pointer;
+		font-weight: 600;
+		-moz-appearance: none;
+		-webkit-appearance: none;
+		appearance: none;
+    }
+
+    button:focus { 
+    	outline: 0; 
+    }
+
+    #word { text-align: center }
+
+	#answer { 
+		color: #19bb19;
+		font-size: 0.5em;
+		line-height: 1.5;
+		text-align: center;
+	}
+
+	#mode { 
+		background-color: #dedede;
+		border-radius: 3px;
+		font-size: 1em;
+		height: 3em;
+		margin-left: 1em;
+		padding: 0 2em 0 1em;
+	}
+
+	#show-answer { 
+		background-color: #b8ebff;
+		color: #387e9a;
+		font-size: 0.25em;
+		height: 3em;
+		margin-top: 1em;
+	}
+	#show-answer:hover {
+		background-color: #9fe4ff;
+	}
+
+	#show-answer:active {
+		background-color: #83dcff;
+	}
+
+	#next {
+		border: 2px solid #afafaf;
+		color: #848484;
+		font-size: 0.25em;
+		height: 3em;
+	}
+
+	#next:hover {
+		background-color: #eaeaea;
+	}
+
+	#next:active {
+		background-color: #dfdfdf;
+		border: 2px solid #999;
+	}
+    
+    .card {
+    	align-content: center;
+    	background-color: #fff;
+    	border-radius: 3px;
+    	box-shadow: 0px 2px 4px 1px rgba(0, 0, 0, 0.15);
+    	display: grid;
+    	margin: 1em auto 0.5em;
+    	padding: 0.5em;
+    	width: 6em;
+    }
+
+    .eng {
+    	font-family: 'Lato';
+    }
+
+    .instruction {
+    	border-top: 1px solid #ddd;
+    	color: #999;
+    	font-family: 'Arial', 'Segoe UI';
+    	font-size: 0.2em;
+    	letter-spacing: 0.1em;
+    	padding-top: 2.5em;
+    	text-align: center;
+    	text-transform: uppercase;
+    }
+
+	.kanjifuri {
+		display: inline-block;
+        font-family: Dengxian,Hiragino Kaku Gothic ProN,Sazanami Gothic,Meiryo,MS PGothic,sans-serif;
+		font-weight: 800;
+		line-height: 1;
+		margin: 0.8em 0 0.5em;
+		position: relative;
+	}
+    .furigana {
+        /*text-orientation: upright;
+        writing-mode: vertical-rl;*/
+        bottom: 100%;
+        color: #999;
+        font-size: 0.5em;
+        font-family: Dengxian,Hiragino Kaku Gothic ProN,Sazanami Gothic,Meiryo,MS PGothic,sans-serif;
+        left: 0;
+		overflow: visible;
+		padding: 0.2em;
+		position: absolute;
+		white-space: nowrap;
+    }
+
+    .mode-select {
+    	display: inline;
+    	font-family: 'Lato';
+    	font-size: 0.25em;
+    	font-weight: 600;
+    	text-align: center;
+    }
+
+	.tense {
+		color: #999;
+		display: block;
+		font-size: 0.5em;
+		font-family: 'Lato';
+		line-height: 2.5;
+		text-align: center;
+	}
+
+	@media only screen 
+  		and (min-device-width: 375px) 
+  		and (max-device-width: 812px) 
+  		and (-webkit-min-device-pixel-ratio: 3)
+  		and (orientation: portrait) { 
+
+  			footer {
+  				width: 90vw;
+  				grid-gap: 1em;
+  			}
+
+  			#show-answer, #next {
+  				font-size: 0.6em;
+  				height: 3em;
+  			}
+
+  			#show-answer {
+  				margin-top: 0.33em;
+  			}
+
+  			.card {
+  				width: 90vw;
+  			}
+
+  			.eng {
+  				font-size: 2em;
+  			}
+
+  			.furigana {
+  				font-size: 0.45em;
+  			}
+
+  			.instruction {
+  				font-size: 0.5em;
+  			}
+
+  			.kanjifuri {
+  				font-size: 2em;
+  			}
+
+  			.mode-select {
+  				font-size: 0.6em;
+  			}
+
+			.mode-select input[type="checkbox"] {
+				zoom: 3;
+			}
+
+  			.tense {
+  				font-size: 1em;
+  			}
+	}
+
+</style>
+
+<div class="card">
+	<div id="word"></div>
+	<div class="instruction">Conjugate the adjective into</div>
+	<div id="question"></div>
+	<button id="show-answer">Show answer</button>
+	<div id="answer"></div>
+</div>
+<footer>
+    <button id="next">Next question</button>
+    <div class="mode-select">
+    	<span>Show:</span>
+		<input type="checkbox" id="toggle-furigana" /><label for="toggle-furigana">Furigana</label>
+		<input type="checkbox" id="toggle-english" /><label for="toggle-english">English</label>
+	</div>
+    <div class="mode-select">
+    	<span>Include:</span>
+		<input type="checkbox" id="toggle-i" checked /><label for="toggle-i">い-adjectives</label>
+		<input type="checkbox" id="toggle-na" checked /><label for="toggle-na">な-adjectives</label>
+	</div>
+</footer>
+
+<script>
+	function N5IAdjFurigana() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2011/08/03/list-of-i-adjectives-for-the-jlpt-n5/
+		return [
+		  "あおい",
+		  "あかい",
+		  "あかるい",
+		  "あたたかい",
+		  "あたらしい",
+		  "あつい",
+		  "あつい",
+		  "あぶない",
+		  "あまい",
+		  "よい",
+		  "いそがしい",
+		  "いたい",
+		  "うすい",
+		  "おいしい",
+		  "おおきい",
+		  "おそい",
+		  "おもい",
+		  "おもしろい",
+		  "からい",
+		  "かるい",
+		  "かわいい",
+		  "きいろい",
+		  "きたない",
+		  "くらい",
+		  "くろい",
+		  "さむい",
+		  "しろい",
+		  "すずしい",
+		  "せまい",
+		  "たかい",
+		  "たのしい",
+		  "ちいさい",
+		  "ちかい",
+		  "つまらない",
+		  "つめたい",
+		  "つよい",
+		  "とおい",
+		  "ながい",
+		  "はやい",
+		  "はやい",
+		  "ひくい",
+		  "ひろい",
+		  "ふとい",
+		  "ふるい",
+		  "ほしい",
+		  "ほそい",
+		  "まずい",
+		  "まるい",
+		  "みじかい",
+		  "むずかしい",
+		  "やさしい",
+		  "やすい",
+		  "わかい"
+		];
+	}
+	function N5IAdjKanji() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2011/08/03/list-of-i-adjectives-for-the-jlpt-n5/
+		return [
+		  "青い",
+		  "赤い",
+		  "明るい",
+		  "温かい",
+		  "新しい",
+		  "暑い",
+		  "厚い",
+		  "危ない",
+		  "甘い",
+		  "良い",
+		  "忙しい",
+		  "痛い",
+		  "薄い",
+		  "美味しい",
+		  "大きい",
+		  "遅い",
+		  "重い",
+		  "面白い",
+		  "辛い",
+		  "軽い",
+		  "可愛い",
+		  "黄色い",
+		  "汚い",
+		  "暗い",
+		  "黒い",
+		  "寒い",
+		  "白い",
+		  "涼しい",
+		  "狭い",
+		  "高い",
+		  "楽しい",
+		  "小さい",
+		  "近い",
+		  "詰らない",
+		  "冷たい",
+		  "強い",
+		  "遠い",
+		  "長い",
+		  "早い",
+		  "速い",
+		  "低い",
+		  "広い",
+		  "太い",
+		  "古い",
+		  "欲しい",
+		  "細い",
+		  "不味い",
+		  "丸い",
+		  "短い",
+		  "難しい",
+		  "優しい",
+		  "安い",
+		  "若い"
+		];
+	}
+	function N5IAdjEnglish() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2011/08/03/list-of-i-adjectives-for-the-jlpt-n5/
+		return [
+		  "blue",
+		  "red",
+		  "light, bright",
+		  "warm",
+		  "new",
+		  "hot (air)",
+		  "thick",
+		  "dangerous",
+		  "sweet",
+		  "good",
+		  "to be busy",
+		  "to be painful",
+		  "thin",
+		  "tasty, delicious",
+		  "big",
+		  "late, slow",
+		  "heavy",
+		  "intersting, funny",
+		  "hot, spicy",
+		  "light (not heavy)",
+		  "cute, pretty",
+		  "yellow",
+		  "dirty",
+		  "dark",
+		  "black",
+		  "cold",
+		  "white",
+		  "cool",
+		  "narrow",
+		  "high, expensive",
+		  "pleasant, enjoyable",
+		  "small",
+		  "near, close",
+		  "uninteresting",
+		  "cold",
+		  "strong",
+		  "far",
+		  "long",
+		  "early",
+		  "fast, quick",
+		  "low",
+		  "wide, spacious",
+		  "thick, fat",
+		  "old",
+		  "to want something",
+		  "thin, fine",
+		  "bad tasting",
+		  "round",
+		  "short",
+		  "difficult",
+		  "gentle",
+		  "cheap",
+		  "young"
+		];
+	}
+	function N5NaAdjFurigana() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2012/06/04/list-of-na-adjectives-for-the-jlpt-n5/
+		return [
+		  "すき",
+		  "けっこう",
+		  "ゆうめい",
+		  "きれい",
+		  "ていねい",
+		  "きらい",
+		  "しずか",
+		  "ひま",
+		  "にぎやか",
+		  "べんり",
+		  "げんき",
+		  "いろいろ",
+		  "だいじょうぶ",
+		  "じょうぶ",
+		  "たいへん",
+		  "らく",
+		  "",
+		  "たいせつ",
+		  "じょうず",
+		  "へた",
+		  "いっしょうけんめい",
+		  "きけん",
+		  "ざんねん",
+		  "しんぱい",
+		  "じゆう",
+		  "じゅうぶん",
+		  "だいすき",
+		  "てきとう",
+		  "とくべつ",
+		  "ねっしん",
+		  "ひつよう",
+		  "",
+		  "まっすぐ",
+		  "むり",
+		  "りっぱ",
+		];
+	}
+	function N5NaAdjKanji() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2012/06/04/list-of-na-adjectives-for-the-jlpt-n5/
+		return [
+		  "好き",
+		  "結構",
+		  "有名",
+		  "きれい",
+		  "丁寧",
+		  "嫌い",
+		  "静か",
+		  "暇",
+		  "賑やか",
+		  "便利",
+		  "元気",
+		  "色々",
+		  "大丈夫",
+		  "丈夫",
+		  "大変",
+		  "楽",
+		  "いや",
+		  "大切",
+		  "上手",
+		  "下手",
+		  "一生懸命",
+		  "危険",
+		  "残念",
+		  "心配",
+		  "自由",
+		  "十分",
+		  "大好き",
+		  "適当",
+		  "特別",
+		  "熱心",
+		  "必要",
+		  "まじめ",
+		  "真直ぐ",
+		  "無理",
+		  "立派",
+		];
+	}
+	function N5NaAdjEnglish() {
+		// Retrieved July 2, 2018 from https://nihongoichiban.com/2012/06/04/list-of-na-adjectives-for-the-jlpt-n5/
+		return [
+		  "like, love",
+		  "wonderful, enviable",
+		  "famous",
+		  "pretty, beautiful",
+		  "polite",
+		  "to not like",
+		  "quiet",
+		  "free (time)",
+		  "lively",
+		  "useful, convenient",
+		  "healthy",
+		  "various",
+		  "OK, fine",
+		  "healthy, robust",
+		  "terrible",
+		  "comfortable, easy",
+		  "unpleasant",
+		  "important, precious",
+		  "good, skilled",
+		  "bad at, unskilled",
+		  "to one’s fullest possibility",
+		  "dangerous",
+		  "regrettable, disappointing",
+		  "care, worry",
+		  "free, unrestrained",
+		  "sufficient",
+		  "passionate",
+		  "proper, suitable",
+		  "special",
+		  "eager, enthusiastic",
+		  "necessary",
+		  "serious, earnest",
+		  "straight",
+		  "unreasonable",
+		  "excellent, splendid, fine",
+		];
+	}
+    function mkSpan(className, contents) {
+        const result = document.createElement('span');
+        result.innerHTML = contents;
+        result.className = className;
+        return result;
+    }
+	function mk(tag, children) {
+		const result = document.createElement(tag);
+		for (const child of children) {
+			result.appendChild(child);
+		}
+		return result;
+	}
+	function longestCommonSuffix(a, b) {
+		let result = '';
+		for (let i=0; i < Math.min(a.length, b.length); i++) {
+			if (a[a.length-i-1] !== b[b.length-i-1]) break;
+			result = a[a.length-i-1] + result;
+		}
+		return result;
+	}
+	class Kanjifuri {
+    	constructor(kanji, furigana_opt) {
+        	this.kanji = kanji;
+        	this.furigana = furigana_opt || '';
+    	}
+		append(newFinal) {
+			return new Kanjifuri(this.kanji + newFinal.kanji, this.furigana + newFinal.furigana);
+		}
+		replaceFinal(newFinal) {
+			return this.removeLastN(1).append(new Kanjifuri(newFinal, newFinal));
+		}
+		removeLastN(n) {
+			return new Kanjifuri(this.kanji.slice(0, this.kanji.length - n), this.furigana.slice(0, this.furigana.length - n));
+		}
+		render(opt) {
+			const suffix = longestCommonSuffix(this.kanji, this.furigana);
+			const prefix = this.removeLastN(suffix.length);
+
+			const result_el = mkSpan('kanjifuri', '');
+			result_el.appendChild(mkSpan('kanji', this.kanji));
+			opt.show_furigana && result_el.appendChild(mkSpan('furigana', prefix.furigana));
+			return result_el;
+		}
+	}
+	const kf = (k,f) => new Kanjifuri(k, f);
+
+	class Tense {
+		static NewRandomTense() {
+			return new Tense(Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5);
+		}
+		constructor(polite, affirm, nonpast) {
+			this.polite = polite;
+			this.affirm = affirm;
+			this.nonpast = nonpast;
+		}
+		render() {
+			return mkSpan('tense', [
+				this.polite ? 'polite' : 'plain',
+				this.affirm ? 'affirmative' : 'negative',
+				this.nonpast ? 'non-past' : 'past'
+			].join(' '));
+		}
+	}
+
+	class Copula {
+		conjugate(tense) {
+			const {polite, affirm, nonpast} = tense;
+			if (!polite && affirm && nonpast) return [kf(''), kf('だ'), kf('な'), kf('の')];
+			if (!polite && affirm && !nonpast) return [kf('だった')];
+			if (!polite && !affirm && nonpast) return [kf('でわない'), kf('じゃない')];
+			if (!polite && !affirm && !nonpast) return [kf('でわなかった'), kf('じゃなかった')];
+			if (polite && affirm && nonpast) return [kf('です')];
+			if (polite && affirm && !nonpast) return [kf('でした')];
+			if (polite && !affirm && nonpast) return [kf('でわありません'), kf('じゃありません'), kf('じゃないです')];
+			if (polite && !affirm && !nonpast) return [kf('でわありませんでした'), kf('でなかった'), kf('じゃありませんでした')];
+			alert(`Unsupported tense for copula: ${JSON.stringify(tense)}`);
+		}
+	}
+
+	class AdjectiveProper {  // Aka い-adjective
+		constructor(kanji) {
+			this.kanji = kanji;
+		}
+		conjugate(tense) {
+			const {polite, affirm, nonpast} = tense;
+			if (!polite && affirm && nonpast) return [this.kanji.replaceFinal('い')];
+			if (!polite && affirm && !nonpast) return [this.kanji.replaceFinal('かった')];
+			if (!polite && !affirm && nonpast) return [this.kanji.replaceFinal('くない')];
+			if (!polite && !affirm && !nonpast) return [this.kanji.replaceFinal('くなかった')];
+			if (polite && affirm && nonpast) return [this.kanji.replaceFinal('いです')];
+			if (polite && affirm && !nonpast) return [this.kanji.replaceFinal('かったです')];
+			if (polite && !affirm && nonpast) return [this.kanji.replaceFinal('くないです'), this.kanji.replaceFinal('くありません')];
+			if (polite && !affirm && !nonpast) return [this.kanji.replaceFinal('くなかったです'), this.kanji.replaceFinal('くありませんでした')];
+			alert(`Unsupported tense for い-adjective ${JSON.stringify(this.kanji)}: ` + JSON.stringify(tense));
+		}
+		render(opt) {
+			return this.kanji.render(opt);
+		}
+	}
+
+	class NaAdjective {
+		constructor(kanji) { this.kanji = kanji; }
+		conjugate(tense) { return (new Copula().conjugate(tense)).map(copulas => this.kanji.append(copulas)); }
+		render(opt) { return this.kanji.render(opt); }
+	}
+
+	class Word {
+		constructor(jpn, eng) { this.jpn = jpn; this.eng = eng; }
+	}
+
+    class Wordlist {
+		constructor(word_arr) { this.words = word_arr; }
+		randomWord() { return this.words[Math.floor(Math.random() * this.words.length)]; }
+	}
+
+	const zip = (...xss) => {
+		!xss.every(xs => xs.length === xss[0].length) && alert('Zip length mismatch.');
+		return xss[0].map((_,idx) => xss.map(xs => xs[idx]));
+	};
+	const concat = (...xss) => {
+		return xss.reduce((xs, acc) => xs.concat(acc), []);
+	};
+	const N5IAdj = zip(N5IAdjKanji(), N5IAdjFurigana(), N5IAdjEnglish())
+		.map(([kanji,furi,eng]) => new Word(new AdjectiveProper(new Kanjifuri(kanji, furi)), eng));
+	const N5NaAdj = zip(N5NaAdjKanji(), N5NaAdjFurigana(), N5NaAdjEnglish())
+		.map(([kanji,furi,eng]) => new Word(new NaAdjective(new Kanjifuri(kanji, furi)), eng));
+
+	const $ = x => document.querySelector(x);
+	class Flashcards {
+		constructor() {
+			this.word = this.tense = null;
+			this.wordHistory = [], this.tenseHistory = [];
+			this.historyIdx = -1;
+			this.showAnswer = false;
+			this.next();
+
+			this.handleShowAnswer = e => {
+				e.preventDefault();
+				this.showAnswer = true;
+				this.render();
+			};
+			this.handleHideAnswer = e => {
+				e.preventDefault();
+				this.showAnswer = false;
+				this.render();
+			};
+			this.handleBack = e => {
+				e.preventDefault();
+				this.back();
+				this.render();
+			};
+			this.handleNext = e => {
+				e.preventDefault();
+				this.next();
+				this.render();
+			};
+			this.handleUIChange = e => {
+				e.preventDefault();
+				this.render();
+			};
+
+			$('#show-answer').addEventListener('click', this.handleShowAnswer);
+			$('#show-answer').addEventListener('touchstart', this.handleShowAnswer);
+			$('#next').addEventListener('click', this.handleNext);
+			$('#next').addEventListener('touchstart', this.handleNext);
+			$('#toggle-furigana').addEventListener('change', this.handleUIChange);
+			$('#toggle-english').addEventListener('change', this.handleUIChange);
+			document.addEventListener('keydown', e => { e.key === 'ArrowLeft' && this.handleBack(e); });
+			document.addEventListener('keydown', e => { e.key === 'ArrowRight' && this.handleNext(e); });
+			document.addEventListener('keydown', e => { e.key === 'ArrowUp' && this.handleHideAnswer(e); });
+			document.addEventListener('keydown', e => { e.key === 'ArrowDown' && this.handleShowAnswer(e); });
+
+			this.render();
+		}
+		next() {
+			const toggleIAdjectives = $('#toggle-i').checked;
+			const toggleNaAdjectives = $('#toggle-na').checked;
+
+			this.historyIdx++;
+			if (this.historyIdx === this.wordHistory.length) {
+				this.wordHistory.push(new Wordlist(concat(
+					toggleIAdjectives ? N5IAdj : [],
+					toggleNaAdjectives ? N5NaAdj : [],
+				)).randomWord());
+				this.tenseHistory.push(Tense.NewRandomTense());
+			}
+			this.word = this.wordHistory[this.historyIdx];
+			this.tense = this.tenseHistory[this.historyIdx];
+			this.showAnswer = false;
+		}
+		back() {
+			if (this.historyIdx === 0) return;
+			this.historyIdx--;
+			this.word = this.wordHistory[this.historyIdx];
+			this.tense = this.tenseHistory[this.historyIdx];
+			this.showAnswer = false;
+		}
+		render() {
+			const toggleFurigana = $('#toggle-furigana').checked;
+			const toggleEnglish = $('#toggle-english').checked;
+
+			while ($('#word').firstChild) $('#word').firstChild.remove();
+			while ($('#question').firstChild) $('#question').firstChild.remove();
+			while ($('#answer').firstChild) $('#answer').firstChild.remove();
+
+			$('#word').appendChild(this.word.jpn.render({ show_furigana: toggleFurigana }));
+			toggleEnglish && $('#word').appendChild(mk('div', [mkSpan('eng', this.word.eng)]));
+
+			$('#question').appendChild(this.tense.render());
+
+			$('#show-answer').hidden = this.showAnswer;
+			$('#answer').hidden = !this.showAnswer;
+			!toggleEnglish && $('#answer').appendChild(mkSpan('eng', this.word.eng));
+			for (const answer of this.word.jpn.conjugate(this.tense)) {
+				$('#answer').appendChild(mk('div', [answer.render({ show_furigana: false })]));
+			}
+		}
+	}
+
+	const state = new Flashcards();
+</script>
