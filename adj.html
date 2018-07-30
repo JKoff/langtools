@@ -212,13 +212,14 @@
     <button id="next">Next question</button>
     <div class="mode-select">
     	<span>Show:</span>
-		<input type="checkbox" id="toggle-furigana" /><label for="toggle-furigana">Furigana</label>
-		<input type="checkbox" id="toggle-english" /><label for="toggle-english">English</label>
+		<input type="checkbox" id="toggle-furigana" checked /><label for="toggle-furigana">Furigana</label>
+		<input type="checkbox" id="toggle-english" checked /><label for="toggle-english">English</label>
 	</div>
     <div class="mode-select">
     	<span>Include:</span>
 		<input type="checkbox" id="toggle-i" checked /><label for="toggle-i">い-adjectives</label>
 		<input type="checkbox" id="toggle-na" checked /><label for="toggle-na">な-adjectives</label>
+		<input type="checkbox" id="toggle-plain" checked /><label for="toggle-plain">Plain form</label>
 	</div>
 </footer>
 
@@ -568,6 +569,9 @@
 		static NewRandomTense() {
 			return new Tense(Math.random() < 0.5, Math.random() < 0.5, Math.random() < 0.5);
 		}
+		static NewRandomPoliteTense() {
+			return new Tense(true, Math.random() < 0.5, Math.random() < 0.5);
+		}
 		constructor(polite, affirm, nonpast) {
 			this.polite = polite;
 			this.affirm = affirm;
@@ -587,12 +591,12 @@
 			const {polite, affirm, nonpast} = tense;
 			if (!polite && affirm && nonpast) return [kf(''), kf('だ'), kf('な'), kf('の')];
 			if (!polite && affirm && !nonpast) return [kf('だった')];
-			if (!polite && !affirm && nonpast) return [kf('でわない'), kf('じゃない')];
-			if (!polite && !affirm && !nonpast) return [kf('でわなかった'), kf('じゃなかった')];
+			if (!polite && !affirm && nonpast) return [kf('ではない'), kf('じゃない')];
+			if (!polite && !affirm && !nonpast) return [kf('ではなかった'), kf('じゃなかった')];
 			if (polite && affirm && nonpast) return [kf('です')];
 			if (polite && affirm && !nonpast) return [kf('でした')];
-			if (polite && !affirm && nonpast) return [kf('でわありません'), kf('じゃありません'), kf('じゃないです')];
-			if (polite && !affirm && !nonpast) return [kf('でわありませんでした'), kf('でなかった'), kf('じゃありませんでした')];
+			if (polite && !affirm && nonpast) return [kf('ではありません'), kf('じゃありません'), kf('じゃないです')];
+			if (polite && !affirm && !nonpast) return [kf('ではありませんでした'), kf('でなかった'), kf('じゃありませんでした'), kf('じゃなかったです')];
 			alert(`Unsupported tense for copula: ${JSON.stringify(tense)}`);
 		}
 	}
@@ -674,6 +678,17 @@
 				this.next();
 				this.render();
 			};
+			const fanfareAudio = new Audio('assets/fanfare1.mp3');
+			fanfareAudio.autoplay = false;
+			this.handleFanfareStart = e => {
+				e.preventDefault();
+				fanfareAudio.play();
+			};
+			this.handleFanfareComplete = e => {
+				e.preventDefault();
+				fanfareAudio.pause();
+				fanfareAudio.fastSeek(0);
+			};
 			this.handleUIChange = e => {
 				e.preventDefault();
 				this.render();
@@ -687,6 +702,8 @@
 			$('#toggle-english').addEventListener('change', this.handleUIChange);
 			document.addEventListener('keydown', e => { e.key === 'ArrowLeft' && this.handleBack(e); });
 			document.addEventListener('keydown', e => { e.key === 'ArrowRight' && this.handleNext(e); });
+			document.addEventListener('keydown', e => { e.key === 'f' && this.handleFanfareStart(e); });
+			document.addEventListener('keyup', e => { e.key === 'f' && this.handleFanfareComplete(e); });
 			document.addEventListener('keydown', e => { e.key === 'ArrowUp' && this.handleHideAnswer(e); });
 			document.addEventListener('keydown', e => { e.key === 'ArrowDown' && this.handleShowAnswer(e); });
 
@@ -695,6 +712,7 @@
 		next() {
 			const toggleIAdjectives = $('#toggle-i').checked;
 			const toggleNaAdjectives = $('#toggle-na').checked;
+			const togglePlain = $('#toggle-plain').checked;
 
 			this.historyIdx++;
 			if (this.historyIdx === this.wordHistory.length) {
@@ -702,7 +720,7 @@
 					toggleIAdjectives ? N5IAdj : [],
 					toggleNaAdjectives ? N5NaAdj : [],
 				)).randomWord());
-				this.tenseHistory.push(Tense.NewRandomTense());
+				this.tenseHistory.push(togglePlain ? Tense.NewRandomTense() : Tense.NewRandomPoliteTense());
 			}
 			this.word = this.wordHistory[this.historyIdx];
 			this.tense = this.tenseHistory[this.historyIdx];
